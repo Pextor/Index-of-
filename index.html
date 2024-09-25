@@ -31,12 +31,9 @@
     button:hover {
       background-color: #0056b3;
     }
-    #admin-section, #logoutButton {
+    #admin-section {
       margin-top: 50px;
-      display: none; /* 초기에는 관리자 섹션과 로그아웃 버튼 숨김 */
-    }
-    #message-section {
-      display: none; /* 초기에는 메시지 섹션 숨김 */
+      display: none; /* 초기에는 관리자 섹션 숨김 */
     }
     ul {
       list-style-type: none;
@@ -67,8 +64,6 @@
       <button type="submit">로그인</button>
   </form>
 
-  <button id="logoutButton">로그아웃</button>
-
   <div id="admin-section">
     <h2>관리자 페이지</h2>
     <h3>모든 사용자에게 메시지 전송</h3>
@@ -89,6 +84,8 @@
         <input type="number" id="banDuration" placeholder="추방 기간 (초 단위)" required />
         <button type="submit">추방하기</button>
     </form>
+
+    <button id="logoutButton">로그아웃</button> <!-- 로그아웃 버튼 추가 -->
   </div>
 
   <script>
@@ -97,19 +94,33 @@
         const isLoggedIn = localStorage.getItem('adminLoggedIn');
         if (isLoggedIn) {
             document.getElementById('admin-section').style.display = 'block';
-            document.getElementById('message-section').style.display = 'block';
-            document.getElementById('adminLoginForm').style.display = 'none'; // 로그인 폼 숨김
-            document.getElementById('logoutButton').style.display = 'block'; // 로그아웃 버튼 표시
             fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
             displayMessages(); // 관리자 페이지 로드 시 메시지 가져오기
+        } else {
+            document.getElementById('admin-section').style.display = 'none'; // 로그인하지 않으면 숨김
         }
     }
 
-    // 로그아웃 처리
+    // 관리자 로그인 이벤트
+    document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 기본 제출 방지
+        const password = this.elements[0].value;
+
+        // 비밀번호 체크 (예: 'gameballCVE'로 설정)
+        if (password === 'gameballCVE') {
+            localStorage.setItem('adminLoggedIn', true); // 로그인 상태 저장
+            checkLoginStatus(); // 로그인 상태 확인
+            alert('관리자 로그인 성공!');
+        } else {
+            alert('잘못된 비밀번호입니다.');
+        }
+    });
+
+    // 관리자 로그아웃 처리
     document.getElementById('logoutButton').addEventListener('click', function() {
-        localStorage.removeItem('adminLoggedIn');
+        localStorage.removeItem('adminLoggedIn'); // 로그인 상태 삭제
+        checkLoginStatus(); // 로그인 상태 확인
         alert('로그아웃되었습니다.');
-        location.reload(); // 페이지 새로고침
     });
 
     // 피드백 제출 처리
@@ -118,46 +129,50 @@
         const name = this.elements.name.value;
         const feedback = this.elements.feedback.value;
 
+        // 한국어 입력 확인
         if (!/^[가-힣]+$/.test(name)) {
             alert('실명은 한국어로 입력해야 합니다.');
             return;
         }
 
+        // 추방 확인
         const banStatus = localStorage.getItem(`banned_${name}`);
         if (banStatus) {
             alert('당신은 추방되었습니다.');
             return;
         }
 
+        // 로컬 스토리지에 피드백 저장
         const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
         feedbacks.push({ name, feedback, date: new Date().toLocaleString() });
         localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
 
         alert('의견이 전송되었습니다!');
-        this.reset();
-        fetchFeedback();
+        this.reset(); // 폼 초기화
+        fetchFeedback(); // 피드백 실시간 반영
     });
 
     // 모든 사용자에게 메시지 전송
     document.getElementById('messageForm').addEventListener('submit', function(event) {
-        event.preventDefault();
+        event.preventDefault(); // 기본 제출 방지
         const recipient = this.elements.recipientName.value;
         const message = this.elements.message.value;
 
+        // 메시지를 로컬 스토리지에 저장
         const messages = JSON.parse(localStorage.getItem('messages')) || [];
         messages.push({ recipient, message, date: new Date().toLocaleString() });
         localStorage.setItem('messages', JSON.stringify(messages));
 
         alert('메시지가 모든 사용자에게 전송되었습니다!');
-        this.reset();
-        displayMessages();
+        this.reset(); // 폼 초기화
+        displayMessages(); // 메시지 표시
     });
 
     // 메시지 표시
     function displayMessages() {
         const messages = JSON.parse(localStorage.getItem('messages')) || [];
         const messageList = document.getElementById('message-list');
-        messageList.innerHTML = '';
+        messageList.innerHTML = ''; // 이전 메시지 초기화
 
         messages.forEach(msg => {
             const listItem = document.createElement('div');
@@ -166,25 +181,12 @@
         });
     }
 
-    // 관리자 로그인 이벤트
-    document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const password = this.elements[0].value;
-
-        if (password === 'gameballCVE') {
-            localStorage.setItem('adminLoggedIn', true);
-            checkLoginStatus();
-        } else {
-            alert('잘못된 비밀번호입니다.');
-        }
-    });
-
     // 피드백 가져오기
     function fetchFeedback() {
         const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
         const list = document.getElementById('feedback-list');
 
-        list.innerHTML = '';
+        list.innerHTML = ''; // 기존 피드백 초기화
         feedbacks.forEach(feedback => {
             const listItem = document.createElement('li');
             listItem.textContent = `${feedback.date} - ${feedback.name}: ${feedback.feedback}`;
@@ -194,35 +196,41 @@
 
     // 추방 기능
     document.getElementById('banForm').addEventListener('submit', function(event) {
-        event.preventDefault();
+        event.preventDefault(); // 기본 제출 방지
         const banName = this.elements.banName.value;
         const banReason = this.elements.banReason.value;
         const banDuration = this.elements.banDuration.value;
 
+        // 추방 메시지 표시
         alert(`${banName}는 '${banReason}' 때문에 ${banDuration}초 동안 추방되었습니다.`);
         
-        const banEndTime = Date.now() + banDuration * 1000;
+        // 추방된 사용자 로컬 스토리지에 저장
+        const banEndTime = Date.now() + banDuration * 1000; // 현재 시간 + 추방 시간
         localStorage.setItem(`banned_${banName}`, banEndTime);
 
+        // 추방 확인
         setTimeout(() => {
-            localStorage.removeItem(`banned_${banName}`);
+            localStorage.removeItem(`banned_${banName}`); // 시간 초과 후 추방 해제
             alert(`${banName}의 추방이 해제되었습니다.`);
         }, banDuration * 1000);
     });
 
+    // 페이지 로드 시 추방 상태 확인
     window.addEventListener('load', () => {
         const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
         const banKeys = Object.keys(localStorage).filter(key => key.startsWith('banned_'));
 
         banKeys.forEach(key => {
-            const banEndTime = localStorage.getItem(key);
-            if (Date.now() < banEndTime) {
-                alert(`당신은 ${key.replace('banned_', '')}으로부터 추방되었습니다.`);
-                document.body.innerHTML = '<h2>당신은 추방되었습니다. 사이트에 접근할 수 없습니다.</h2>';
-            }
-        });
-        checkLoginStatus();
-    });
-  </script>
+            const     banEndTime = localStorage.getItem(key);
+    if (banEndTime && Date.now() > parseInt(banEndTime)) {
+        // 추방 시간이 지나면 추방 해제
+        localStorage.removeItem(key);
+    }
+  });
+
+  checkLoginStatus(); // 페이지 로드 시 로그인 상태 확인
+});
+</script>
 </body>
 </html>
+
