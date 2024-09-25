@@ -44,8 +44,11 @@
 <body>
   <h1>Index of /</h1>
   <ul id="file-list">
-    <li><a href="https://ko.anotepad.com/note/read/x3q4timb">설명서</a></li>
-    <li><a href="https://www.google.com">구글</a><li>
+    <li><a href="https://ko.anotepad.com/note/read/x3q4timb">Index.txt</a></li>
+    <li><a href="https://example.com/file2.jpg">file2.jpg</a></li>
+    <li><a href="https://example.com/file3.pdf">file3.pdf</a></li>
+    <li><a href="folder1/">folder1/</a></li>
+    <li><a href="folder2/">folder2/</a></li>
   </ul>
 
   <h1>의견 남기기</h1>
@@ -63,6 +66,7 @@
 
   <div id="admin-section">
     <h2>관리자 페이지</h2>
+    
     <h3>모든 사용자에게 메시지 전송</h3>
     <form id="messageForm">
         <input type="text" id="recipientName" placeholder="받는 사람" required />
@@ -70,6 +74,14 @@
         <button type="submit">메시지 전송</button>
     </form>
     <div id="message-list"></div>
+
+    <h3>특정 사용자에게 메시지 전송</h3>
+    <form id="specificMessageForm">
+        <input type="text" id="specificRecipient" placeholder="받는 사람" required />
+        <textarea id="specificMessage" placeholder="보낼 메시지를 입력하세요." required></textarea>
+        <button type="submit">메시지 전송</button>
+    </form>
+    <div id="specific-message-list"></div>
 
     <h3>수신된 의견</h3>
     <ul id="feedback-list"></ul>
@@ -93,6 +105,7 @@
             document.getElementById('admin-section').style.display = 'block';
             fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
             displayMessages(); // 관리자 페이지 로드 시 메시지 가져오기
+            displaySpecificMessages(); // 관리자 페이지 로드 시 특정 메시지 가져오기
         } else {
             document.getElementById('admin-section').style.display = 'none'; // 로그인하지 않으면 숨김
         }
@@ -165,6 +178,22 @@
         displayMessages(); // 메시지 표시
     });
 
+    // 특정 사용자에게 메시지 전송 기능
+    document.getElementById('specificMessageForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 기본 제출 방지
+        const recipient = this.elements.specificRecipient.value;
+        const message = this.elements.specificMessage.value;
+
+        // 메시지를 로컬 스토리지에 저장
+        const specificMessages = JSON.parse(localStorage.getItem('specificMessages')) || [];
+        specificMessages.push({ recipient, message, date: new Date().toLocaleString() });
+        localStorage.setItem('specificMessages', JSON.stringify(specificMessages));
+
+        alert(`메시지가 ${recipient}에게 전송되었습니다!`);
+        this.reset(); // 폼 초기화
+        displaySpecificMessages(); // 메시지 표시
+    });
+
     // 메시지 표시
     function displayMessages() {
         const messages = JSON.parse(localStorage.getItem('messages')) || [];
@@ -178,56 +207,52 @@
         });
     }
 
-    // 피드백 가져오기
-    function fetchFeedback() {
-        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
-        const list = document.getElementById('feedback-list');
+    // 특정 메시지 표시
+    function displaySpecificMessages() {
+        const specificMessages = JSON.parse(localStorage.getItem('specificMessages')) || [];
+        const specificMessageList = document.getElementById('specific-message-list');
+        specificMessageList.innerHTML = ''; // 이전 메시지 초기화
 
-        list.innerHTML = ''; // 기존 피드백 초기화
-        feedbacks.forEach(feedback => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${feedback.date} - ${feedback.name}: ${feedback.feedback}`;
-            list.appendChild(listItem);
+        specificMessages.forEach(msg => {
+            const listItem = document.createElement('div');
+            listItem.textContent = `${msg.date} - ${msg.recipient}: ${msg.message}`;
+            specificMessageList.appendChild(listItem);
         });
     }
 
-    // 추방 기능
+    // 피드백 가져오기
+    function fetchFeedback() {
+        const feedbacks = JSON.parse(localStorage.getItem
+        ('feedbacks')) || [];
+        const feedbackList = document.getElementById('feedback-list');
+        feedbackList.innerHTML = ''; // 이전 피드백 초기화
+
+        feedbacks.forEach(feedback => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${feedback.date} - ${feedback.name}: ${feedback.feedback}`;
+            feedbackList.appendChild(listItem);
+        });
+    }
+
+    // 사용자 추방 기능
     document.getElementById('banForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 기본 제출 방지
-        const banName = this.elements.banName.value;
-        const banReason = this.elements.banReason.value;
-        const banDuration = this.elements.banDuration.value;
+        const name = this.elements.banName.value;
+        const reason = this.elements.banReason.value;
+        const duration = this.elements.banDuration.value;
 
-        // 추방 메시지 표시
-        alert(`${banName}는 '${banReason}' 때문에 ${banDuration}초 동안 추방되었습니다.`);
-        
-        // 추방된 사용자 로컬 스토리지에 저장
-        const banEndTime = Date.now() + banDuration * 1000; // 현재 시간 + 추방 시간
-        localStorage.setItem(`banned_${banName}`, banEndTime);
-
-        // 추방 확인
+        // 사용자 추방 처리
+        localStorage.setItem(`banned_${name}`, reason);
         setTimeout(() => {
-            localStorage.removeItem(`banned_${banName}`); // 시간 초과 후 추방 해제
-            alert(`${banName}의 추방이 해제되었습니다.`);
-        }, banDuration * 1000);
+            localStorage.removeItem(`banned_${name}`);
+        }, duration * 1000); // duration을 초 단위로 설정
+
+        alert(`${name}님이 추방되었습니다!`);
+        this.reset(); // 폼 초기화
     });
 
-    // 페이지 로드 시 추방 상태 확인
-    window.addEventListener('load', () => {
-        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
-        const banKeys = Object.keys(localStorage).filter(key => key.startsWith('banned_'));
-
-        banKeys.forEach(key => {
-            const     banEndTime = localStorage.getItem(key);
-    if (banEndTime && Date.now() > parseInt(banEndTime)) {
-        // 추방 시간이 지나면 추방 해제
-        localStorage.removeItem(key);
-    }
-  });
-
-  checkLoginStatus(); // 페이지 로드 시 로그인 상태 확인
-});
-</script>
+    // 페이지 로드 시 로그인 상태 확인
+    window.onload = checkLoginStatus;
+  </script>
 </body>
 </html>
-
