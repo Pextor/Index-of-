@@ -20,28 +20,11 @@
 <body>
   <h1>Index of /</h1>
   <ul id="file-list">
-    <!-- JavaScript로 파일 목록을 동적으로 추가할 공간 -->
+    <li><a href="https://gist.githubusercontent.com/anonymous/0c2aa55b4b8bfc8180b432e33a79e3c4/raw/empty.txt">empty.txt</a></li>
+    <li><a href="https://example.com/file2.jpg">file2.jpg</a></li>
+    <li><a href="https://example.com/file3.pdf">file3.pdf</a></li>
+    <li><a href="folder1/">folder1/</a></li>
+    <li><a href="folder2/">folder2/</a></li>
   </ul>
-
-  <script>
-    const files = [
-      'file1.md',
-      'file2.jpg',
-      'file3.pdf',
-      'folder1/',
-      'folder2/'
-    ];
-
-    const fileList = document.getElementById('file-list');
-
-    files.forEach(file => {
-      const li = document.createElement('li');
-      const link = document.createElement('a');
-      link.href = file;
-      link.textContent = file;
-      li.appendChild(link);
-      fileList.appendChild(li);
-    });
-  </script>
 </body>
 </html>
