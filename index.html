@@ -31,10 +31,6 @@
     button:hover {
       background-color: #0056b3;
     }
-    #admin-section {
-      margin-top: 50px;
-      display: none; /* 초기에는 관리자 섹션 숨김 */
-    }
     ul {
       list-style-type: none;
       padding: 0;
@@ -42,80 +38,41 @@
   </style>
 </head>
 <body>
-  <h1>Index of /</h1>
-  <ul id="file-list">
-    <li><a href="https://ko.anotepad.com/note/read/27rm8bcn">Index.txt</a></li>
-    <li><a href="https://example.com/file2.jpg">file2.jpg</a></li>
-    <li><a href="https://example.com/file3.pdf">file3.pdf</a></li>
-    <li><a href="folder1/">folder1/</a></li>
-    <li><a href="folder2/">folder2/</a></li>
-  </ul>
-
-  <h1>의견 남기기</h1>
+  <h1>피드백 남기기</h1>
   <form id="feedbackForm">
-      <textarea name="feedback" placeholder="의견을 남겨주세요." required></textarea>
-      <button type="submit">보내기</button>
+    <textarea name="feedback" placeholder="의견을 남겨주세요." required></textarea>
+    <button type="submit">보내기</button>
   </form>
 
-  <h2>관리자 로그인</h2>
-  <form id="adminLoginForm">
-      <input type="password" placeholder="비밀번호 입력" required />
-      <button type="submit">로그인</button>
-  </form>
-
-  <div id="admin-section">
-    <h2>관리자 페이지</h2>
-    <h3>수신된 의견</h3>
-    <ul id="feedback-list"></ul>
-  </div>
+  <h2>수신된 피드백</h2>
+  <ul id="feedback-list"></ul>
 
   <script>
-    // 피드백 제출 처리
-    document.getElementById('feedbackForm').addEventListener('submit', async function(event) {
-        event.preventDefault(); // 기본 제출 방지
-        const feedback = this.elements.feedback.value;
+    const feedbackForm = document.getElementById('feedbackForm');
+    const feedbackList = document.getElementById('feedback-list');
 
-        // 서버에 의견 전송
-        const response = await fetch('/feedback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ feedback }),
-        });
-
-        if (response.ok) {
-            alert('의견이 전송되었습니다!');
-            this.reset(); // 폼 초기화
-        } else {
-            alert('전송 중 오류가 발생했습니다.');
-        }
+    // 피드백 저장 및 로드
+    feedbackForm.addEventListener('submit', function(event) {
+      event.preventDefault(); // 기본 제출 방지
+      const feedback = this.elements.feedback.value;
+      const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
+      feedbacks.push(feedback);
+      localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
+      loadFeedback();
+      this.reset(); // 폼 초기화
     });
 
-    // 관리자 로그인 이벤트
-    document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // 기본 제출 방지
-        const password = this.elements[0].value;
-
-        // 비밀번호 체크 (예: 'admin123'로 설정)
-        if (password === 'gameballCVE') {
-            document.getElementById('admin-section').style.display = 'block';
-            fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
-        } else {
-            alert('잘못된 비밀번호입니다.');
-        }
-    });
-
-    // 피드백 가져오기
-    async function fetchFeedback() {
-        const response = await fetch('/api/feedback');
-        const feedbacks = await response.json();
-        const list = document.getElementById('feedback-list');
-
-        feedbacks.forEach(feedback => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${feedback.date}: ${feedback.feedback}`;
-            list.appendChild(listItem);
-        });
+    function loadFeedback() {
+      feedbackList.innerHTML = ''; // 리스트 초기화
+      const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
+      feedbacks.forEach(feedback => {
+        const listItem = document.createElement('li');
+        listItem.textContent = feedback;
+        feedbackList.appendChild(listItem);
+      });
     }
+
+    loadFeedback(); // 페이지 로드 시 피드백 로드
   </script>
 </body>
 </html>
