@@ -105,7 +105,7 @@
         event.preventDefault(); // 기본 제출 방지
         const password = this.elements[0].value;
 
-        // 비밀번호 체크
+        // 비밀번호 체크 (예: 'admin123'로 설정)
         if (password === 'gameballCVE') {
             document.getElementById('admin-section').style.display = 'block';
             fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
@@ -127,20 +127,33 @@
     }
 
     // 추방 기능
+    const bannedUsers = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+
     document.getElementById('banForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 기본 제출 방지
         const banName = this.elements.banName.value;
         const banReason = this.elements.banReason.value;
         const banDuration = parseInt(this.elements.banDuration.value);
 
-        // 추방 메시지 표시
+        // 사용자를 추방
+        bannedUsers.push({ name: banName, reason: banReason, duration: banDuration, timestamp: Date.now() });
+        localStorage.setItem('bannedUsers', JSON.stringify(bannedUsers));
+
         alert(`${banName}는 '${banReason}' 때문에 ${banDuration}초 동안 추방되었습니다.`);
-        
-        // 추방 기능 (일시적)
-        setTimeout(() => {
-            alert(`${banName}는 추방 기간이 만료되었습니다.`);
-        }, banDuration * 1000);
     });
+
+    // 페이지 로드 시 추방 확인
+    window.onload = function() {
+        const currentTime = Date.now();
+        bannedUsers.forEach(user => {
+            if (currentTime < user.timestamp + user.duration * 1000) {
+                alert(`${user.name}는 현재 추방 중입니다. (${user.reason})`);
+                // 웹사이트 접근 차단
+                document.body.innerHTML = "<h1>당신은 추방되었습니다.</h1>";
+                return; // 이후 코드 실행 방지
+            }
+        });
+    };
   </script>
 </body>
 </html>
