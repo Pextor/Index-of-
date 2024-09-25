@@ -35,9 +35,6 @@
       margin-top: 50px;
       display: none; /* 초기에는 관리자 섹션 숨김 */
     }
-    #message-section {
-      display: none; /* 초기에는 메시지 섹션 숨김 */
-    }
     ul {
       list-style-type: none;
       padding: 0;
@@ -223,4 +220,10 @@
             const banEndTime = localStorage.getItem(key);
             if (Date.now() < banEndTime) {
                 const bannedUser = key.split('_')[1];
-                alert(`${bannedUser}님은 현재 추
+                alert(`${bannedUser}님은 현재 추방 중입니다.`);
+            }
+        });
+    });
+  </script>
+</body>
+</html>
