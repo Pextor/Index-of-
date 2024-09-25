@@ -105,7 +105,7 @@
         event.preventDefault(); // 기본 제출 방지
         const password = this.elements[0].value;
 
-        // 비밀번호 체크 (예: 'admin123'로 설정)
+        // 비밀번호 체크
         if (password === 'gameballCVE') {
             document.getElementById('admin-section').style.display = 'block';
             fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
@@ -131,9 +131,16 @@
         event.preventDefault(); // 기본 제출 방지
         const banName = this.elements.banName.value;
         const banReason = this.elements.banReason.value;
-        const banDuration = this.elements.banDuration.value;
+        const banDuration = parseInt(this.elements.banDuration.value);
 
         // 추방 메시지 표시
         alert(`${banName}는 '${banReason}' 때문에 ${banDuration}초 동안 추방되었습니다.`);
         
-  
+        // 추방 기능 (일시적)
+        setTimeout(() => {
+            alert(`${banName}는 추방 기간이 만료되었습니다.`);
+        }, banDuration * 1000);
+    });
+  </script>
+</body>
+</html>
