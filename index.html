@@ -58,6 +58,7 @@
 
   <h1>의견 남기기</h1>
   <form id="feedbackForm">
+      <input type="text" name="nickname" placeholder="실명을 입력하시오." required />
       <textarea name="feedback" placeholder="의견을 남겨주세요." required></textarea>
       <button type="submit">보내기</button>
   </form>
@@ -83,11 +84,20 @@
     // 피드백 제출 처리
     document.getElementById('feedbackForm').addEventListener('submit', async function(event) {
         event.preventDefault(); // 기본 제출 방지
+        const nickname = this.elements.nickname.value;
         const feedback = this.elements.feedback.value;
+
+        // 한국어가 아닌 입력 확인
+        const koreanRegex = /^[가-힣]+$/;
+
+        if (!koreanRegex.test(nickname)) {
+            alert('실명은 한글로 입력해야 합니다.');
+            return;
+        }
 
         // 로컬스토리지에 피드백 저장
         const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
-        feedbacks.push({ date: new Date().toISOString(), feedback });
+        feedbacks.push({ date: new Date().toISOString(), nickname, feedback });
         localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
 
         alert('의견이 전송되었습니다!');
@@ -117,7 +127,7 @@
 
         feedbacks.forEach(feedback => {
             const listItem = document.createElement('li');
-            listItem.textContent = `${feedback.date}: ${feedback.feedback}`;
+            listItem.textContent = `${feedback.date} (${feedback.nickname}): ${feedback.feedback}`;
             list.appendChild(listItem);
         });
     }
