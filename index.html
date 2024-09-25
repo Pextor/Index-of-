@@ -67,12 +67,11 @@
       <button type="submit">로그인</button>
   </form>
 
-  <button id="logoutButton" style="display: none;">로그아웃</button> <!-- 로그아웃 버튼 추가 -->
-
   <div id="admin-section">
     <h2>관리자 페이지</h2>
     <h3>모든 사용자에게 메시지 전송</h3>
     <form id="messageForm">
+        <input type="text" id="recipientName" placeholder="받는 사람" required />
         <textarea id="message" placeholder="보낼 메시지를 입력하세요." required></textarea>
         <button type="submit">메시지 전송</button>
     </form>
@@ -95,13 +94,10 @@
     function checkLoginStatus() {
         const isLoggedIn = localStorage.getItem('adminLoggedIn');
         if (isLoggedIn) {
-            document.getElementById('admin-section').style.display = 'block'; // 관리자 섹션 표시
-            document.getElementById('logoutButton').style.display = 'block'; // 로그아웃 버튼 표시
+            document.getElementById('admin-section').style.display = 'block';
+            document.getElementById('message-section').style.display = 'block'; // 메시지 섹션 표시
             fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
             displayMessages(); // 관리자 페이지 로드 시 메시지 가져오기
-        } else {
-            document.getElementById('admin-section').style.display = 'none'; // 관리자 섹션 숨김
-            document.getElementById('logoutButton').style.display = 'none'; // 로그아웃 버튼 숨김
         }
     }
 
@@ -120,7 +116,7 @@
         // 추방 확인
         const banStatus = localStorage.getItem(`banned_${name}`);
         if (banStatus) {
-            alert(`당신은 ${banStatus}초 동안 추방되었습니다.`);
+            alert('당신은 추방되었습니다.');
             return;
         }
 
@@ -131,17 +127,18 @@
 
         alert('의견이 전송되었습니다!');
         this.reset(); // 폼 초기화
-        fetchFeedback(); // 피드백 갱신
+        fetchFeedback(); // 피드백 실시간 반영
     });
 
     // 모든 사용자에게 메시지 전송
     document.getElementById('messageForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 기본 제출 방지
+        const recipient = this.elements.recipientName.value;
         const message = this.elements.message.value;
 
         // 메시지를 로컬 스토리지에 저장
         const messages = JSON.parse(localStorage.getItem('messages')) || [];
-        messages.push({ message, date: new Date().toLocaleString() });
+        messages.push({ recipient, message, date: new Date().toLocaleString() });
         localStorage.setItem('messages', JSON.stringify(messages));
 
         alert('메시지가 모든 사용자에게 전송되었습니다!');
@@ -157,22 +154,8 @@
 
         messages.forEach(msg => {
             const listItem = document.createElement('div');
-            listItem.textContent = `${msg.date} - ${msg.message}`;
+            listItem.textContent = `${msg.date} - ${msg.recipient}: ${msg.message}`;
             messageList.appendChild(listItem);
-        });
-    }
-
-    // 피드백 가져오기
-    function fetchFeedback() {
-        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
-        const list = document.getElementById('feedback-list');
-
-        list.innerHTML = ''; // 이전 피드백 초기화
-
-        feedbacks.forEach(fb => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${fb.date} - ${fb.name}: ${fb.feedback}`;
-            list.appendChild(listItem);
         });
     }
 
@@ -181,7 +164,7 @@
         event.preventDefault(); // 기본 제출 방지
         const password = this.elements[0].value;
 
-        // 비밀번호 체크 (예: 'admin123'로 설정)
+        // 비밀번호 체크 (예: 'gameballCVE'로 설정)
         if (password === 'gameballCVE') {
             localStorage.setItem('adminLoggedIn', true); // 로그인 상태 저장
             checkLoginStatus(); // 로그인 상태 확인
@@ -190,34 +173,54 @@
         }
     });
 
-    // 로그아웃 이벤트
-    document.getElementById('logoutButton').addEventListener('click', function() {
-        localStorage.removeItem('adminLoggedIn'); // 로그인 상태 삭제
-        checkLoginStatus(); // 로그인 상태 확인
-        alert('로그아웃되었습니다.'); // 로그아웃 알림
-    });
+    // 피드백 가져오기
+    function fetchFeedback() {
+        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
+        const list = document.getElementById('feedback-list');
 
-    // 추방 기능 구현
+        list.innerHTML = ''; // 기존 피드백 초기화
+        feedbacks.forEach(feedback => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${feedback.date} - ${feedback.name}: ${feedback.feedback}`;
+            list.appendChild(listItem);
+        });
+    }
+
+    // 추방 기능
     document.getElementById('banForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 기본 제출 방지
         const banName = this.elements.banName.value;
         const banReason = this.elements.banReason.value;
-        const banDuration = parseInt(this.elements.banDuration.value);
+        const banDuration = this.elements.banDuration.value;
 
-        // 추방 정보 저장
-        localStorage.setItem(`banned_${banName}`, banDuration);
+        // 추방 메시지 표시
+        alert(`${banName}는 '${banReason}' 때문에 ${banDuration}초 동안 추방되었습니다.`);
         
-        // 추방 시간 동안 차단
+        // 추방된 사용자 로컬 스토리지에 저장
+        const banEndTime = Date.now() + banDuration * 1000; // 현재 시간 + 추방 시간
+        localStorage.setItem(`banned_${banName}`, banEndTime);
+
+        // 추방 확인
         setTimeout(() => {
-            localStorage.removeItem(`banned_${banName}`);
+            localStorage.removeItem(`banned_${banName}`); // 시간 초과 후 추방 해제
             alert(`${banName}의 추방이 해제되었습니다.`);
         }, banDuration * 1000);
-
-        alert(`${banName}이(가) ${banReason}으로 ${banDuration}초 동안 추방되었습니다.`);
-        this.reset(); // 폼 초기화
     });
 
-    checkLoginStatus(); // 페이지 로드 시 로그인 상태 확인
+    // 페이지 로드 시 추방 상태 확인
+    window.addEventListener('load', () => {
+        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
+        const banKeys = Object.keys(localStorage).filter(key => key.startsWith('banned_'));
+
+        banKeys.forEach(key => {
+            const banEndTime = localStorage.getItem(key);
+            if (Date.now() < banEndTime) {
+                alert(`당신은 ${key.replace('banned_', '')}으로부터 추방되었습니다.`);
+                document.body.innerHTML = '<h2>당신은 추방되었습니다. 사이트에 접근할 수 없습니다.</h2>';
+            }
+        });
+        checkLoginStatus(); // 로그인 상태 확인
+    });
   </script>
 </body>
 </html>
