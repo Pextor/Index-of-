@@ -58,6 +58,13 @@
       <button type="submit">보내기</button>
   </form>
 
+  <h1>모든 사용자에게 메시지 전송</h1>
+  <form id="messageForm">
+      <textarea id="message" placeholder="보낼 메시지를 입력하세요." required></textarea>
+      <button type="submit">메시지 전송</button>
+  </form>
+  <div id="message-list"></div>
+
   <h2>관리자 로그인</h2>
   <form id="adminLoginForm">
       <input type="password" placeholder="비밀번호 입력" required />
@@ -107,6 +114,34 @@
         this.reset(); // 폼 초기화
     });
 
+    // 모든 사용자에게 메시지 전송
+    document.getElementById('messageForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 기본 제출 방지
+        const message = this.elements.message.value;
+
+        // 메시지를 로컬 스토리지에 저장
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+        messages.push({ message, date: new Date().toLocaleString() });
+        localStorage.setItem('messages', JSON.stringify(messages));
+
+        alert('메시지가 모든 사용자에게 전송되었습니다!');
+        this.reset(); // 폼 초기화
+        displayMessages(); // 메시지 표시
+    });
+
+    // 메시지 표시
+    function displayMessages() {
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+        const messageList = document.getElementById('message-list');
+        messageList.innerHTML = ''; // 이전 메시지 초기화
+
+        messages.forEach(msg => {
+            const listItem = document.createElement('div');
+            listItem.textContent = `${msg.date} - ${msg.message}`;
+            messageList.appendChild(listItem);
+        });
+    }
+
     // 관리자 로그인 이벤트
     document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 기본 제출 방지
@@ -116,6 +151,7 @@
         if (password === 'gameballCVE') {
             document.getElementById('admin-section').style.display = 'block';
             fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
+            displayMessages(); // 관리자 페이지 로드 시 메시지 가져오기
         } else {
             alert('잘못된 비밀번호입니다.');
         }
@@ -156,6 +192,7 @@
 
     // 페이지 로드 시 추방 상태 확인
     window.addEventListener('load', () => {
+        displayMessages(); // 페이지 로드 시 메시지 표시
         const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
         const banKeys = Object.keys(localStorage).filter(key => key.startsWith('banned_'));
 
