@@ -53,7 +53,7 @@
 
   <h1>의견 남기기</h1>
   <form id="feedbackForm">
-      <input type="text" id="realName" placeholder="실명을 입력하시오." required />
+      <input type="text" id="name" placeholder="실명을 입력하시오." required />
       <textarea name="feedback" placeholder="의견을 남겨주세요." required></textarea>
       <button type="submit">보내기</button>
   </form>
@@ -68,39 +68,44 @@
     <h2>관리자 페이지</h2>
     <h3>수신된 의견</h3>
     <ul id="feedback-list"></ul>
+
     <h3>추방 기능</h3>
-    <input type="text" id="banName" placeholder="추방할 이름을 입력하시오." required />
-    <input type="text" id="banReason" placeholder="추방 사유를 입력하시오." required />
-    <input type="number" id="banDuration" placeholder="추방 기간 (초)" required />
-    <button id="banButton">추방</button>
-    <p id="banMessage" style="color: red;"></p>
+    <form id="banForm">
+        <input type="text" id="banName" placeholder="추방할 이름" required />
+        <textarea id="banReason" placeholder="추방 사유를 입력하세요." required></textarea>
+        <input type="number" id="banDuration" placeholder="추방 기간 (초 단위)" required />
+        <button type="submit">추방하기</button>
+    </form>
   </div>
 
   <script>
-    const bannedNames = new Set(); // 추방된 이름을 저장하는 Set
-
-    document.getElementById('feedbackForm').addEventListener('submit', async function(event) {
+    // 피드백 제출 처리
+    document.getElementById('feedbackForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 기본 제출 방지
-        const realName = this.elements.realName.value.trim();
+        const name = this.elements.name.value;
         const feedback = this.elements.feedback.value;
 
         // 한국어 입력 확인
-        const koreanRegex = /^[가-힣]+$/;
-        if (!koreanRegex.test(realName)) {
+        if (!/^[가-힣]+$/.test(name)) {
             alert('실명은 한국어로 입력해야 합니다.');
             return;
         }
 
-        // 피드백 전송
-        alert(`이름: ${realName}, 의견: ${feedback}`);
+        // 로컬 스토리지에 피드백 저장
+        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
+        feedbacks.push({ name, feedback, date: new Date().toLocaleString() });
+        localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
+
+        alert('의견이 전송되었습니다!');
         this.reset(); // 폼 초기화
     });
 
+    // 관리자 로그인 이벤트
     document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 기본 제출 방지
         const password = this.elements[0].value;
 
-        // 비밀번호 체크
+        // 비밀번호 체크 (예: 'admin123'로 설정)
         if (password === 'gameballCVE') {
             document.getElementById('admin-section').style.display = 'block';
             fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
@@ -109,29 +114,26 @@
         }
     });
 
-    async function fetchFeedback() {
-        // 피드백 가져오는 코드 (예시)
-        // 실제로는 서버에서 가져오는 로직이 필요합니다.
+    // 피드백 가져오기
+    function fetchFeedback() {
+        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
+        const list = document.getElementById('feedback-list');
+
+        feedbacks.forEach(feedback => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${feedback.date} - ${feedback.name}: ${feedback.feedback}`;
+            list.appendChild(listItem);
+        });
     }
 
-    document.getElementById('banButton').addEventListener('click', function() {
-        const nameToBan = document.getElementById('banName').value.trim();
-        const banReason = document.getElementById('banReason').value.trim();
-        const banDuration = parseInt(document.getElementById('banDuration').value.trim(), 10);
+    // 추방 기능
+    document.getElementById('banForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 기본 제출 방지
+        const banName = this.elements.banName.value;
+        const banReason = this.elements.banReason.value;
+        const banDuration = this.elements.banDuration.value;
 
-        if (!bannedNames.has(nameToBan)) {
-            bannedNames.add(nameToBan); // 이름을 추방
-            document.getElementById('banMessage').textContent = `${nameToBan}님이 '${banReason}' 이유로 ${banDuration}초 동안 추방되었습니다.`;
-
-            // 지정된 시간 후에 추방 해제
-            setTimeout(() => {
-                bannedNames.delete(nameToBan);
-                alert(`${nameToBan}님이 추방 해제되었습니다.`);
-            }, banDuration * 1000);
-        } else {
-            document.getElementById('banMessage').textContent = `${nameToBan}님은 이미 추방된 상태입니다.`;
-        }
-    });
-  </script>
-</body>
-</html>
+        // 추방 메시지 표시
+        alert(`${banName}는 '${banReason}' 때문에 ${banDuration}초 동안 추방되었습니다.`);
+        
+  
