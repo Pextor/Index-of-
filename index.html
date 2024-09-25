@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,11 +39,6 @@
       list-style-type: none;
       padding: 0;
     }
-    .user {
-      margin: 5px 0;
-      display: flex;
-      justify-content: space-between;
-    }
   </style>
 </head>
 <body>
@@ -58,7 +53,7 @@
 
   <h1>의견 남기기</h1>
   <form id="feedbackForm">
-      <input type="text" name="nickname" placeholder="실명을 입력하시오." required />
+      <input type="text" id="realName" placeholder="실명을 입력하시오." required />
       <textarea name="feedback" placeholder="의견을 남겨주세요." required></textarea>
       <button type="submit">보내기</button>
   </form>
@@ -73,97 +68,68 @@
     <h2>관리자 페이지</h2>
     <h3>수신된 의견</h3>
     <ul id="feedback-list"></ul>
-    
-    <h3>사용자 관리</h3>
-    <div id="user-list"></div>
-    <textarea id="message" placeholder="사이트 안내 문자를 입력하세요"></textarea>
-    <button id="send-message">안내 문자 전송</button>
+    <h3>추방 기능</h3>
+    <input type="text" id="banName" placeholder="추방할 이름을 입력하시오." required />
+    <input type="text" id="banReason" placeholder="추방 사유를 입력하시오." required />
+    <input type="number" id="banDuration" placeholder="추방 기간 (초)" required />
+    <button id="banButton">추방</button>
+    <p id="banMessage" style="color: red;"></p>
   </div>
 
   <script>
-    // 피드백 제출 처리
+    const bannedNames = new Set(); // 추방된 이름을 저장하는 Set
+
     document.getElementById('feedbackForm').addEventListener('submit', async function(event) {
         event.preventDefault(); // 기본 제출 방지
-        const nickname = this.elements.nickname.value;
+        const realName = this.elements.realName.value.trim();
         const feedback = this.elements.feedback.value;
 
-        // 한국어가 아닌 입력 확인
+        // 한국어 입력 확인
         const koreanRegex = /^[가-힣]+$/;
-
-        if (!koreanRegex.test(nickname)) {
-            alert('실명은 한글로 입력해야 합니다.');
+        if (!koreanRegex.test(realName)) {
+            alert('실명은 한국어로 입력해야 합니다.');
             return;
         }
 
-        // 로컬스토리지에 피드백 저장
-        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
-        feedbacks.push({ date: new Date().toISOString(), nickname, feedback });
-        localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
-
-        alert('의견이 전송되었습니다!');
+        // 피드백 전송
+        alert(`이름: ${realName}, 의견: ${feedback}`);
         this.reset(); // 폼 초기화
     });
 
-    // 관리자 로그인 이벤트
     document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 기본 제출 방지
         const password = this.elements[0].value;
 
-        // 비밀번호 체크 (예: 'gameballCVE'로 설정)
+        // 비밀번호 체크
         if (password === 'gameballCVE') {
             document.getElementById('admin-section').style.display = 'block';
             fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
-            listUsers(); // 사용자 리스트 표시
         } else {
             alert('잘못된 비밀번호입니다.');
         }
     });
 
-    // 피드백 가져오기
-    function fetchFeedback() {
-        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
-        const list = document.getElementById('feedback-list');
-        list.innerHTML = ''; // 이전 내용 지우기
-
-        feedbacks.forEach(feedback => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${feedback.date} (${feedback.nickname}): ${feedback.feedback}`;
-            list.appendChild(listItem);
-        });
+    async function fetchFeedback() {
+        // 피드백 가져오는 코드 (예시)
+        // 실제로는 서버에서 가져오는 로직이 필요합니다.
     }
 
-    // 사용자 리스트 표시 (예시)
-    function listUsers() {
-        const userList = document.getElementById('user-list');
-        userList.innerHTML = ''; // 이전 내용 지우기
-        // 예시 사용자
-        const users = [{ name: 'User1' }, { name: 'User2' }];
-        
-        users.forEach(user => {
-            const userItem = document.createElement('div');
-            userItem.className = 'user';
-            userItem.innerHTML = `
-                ${user.name} 
-                <button onclick="kickUser('${user.name}')">추방</button>
-            `;
-            userList.appendChild(userItem);
-        });
-    }
+    document.getElementById('banButton').addEventListener('click', function() {
+        const nameToBan = document.getElementById('banName').value.trim();
+        const banReason = document.getElementById('banReason').value.trim();
+        const banDuration = parseInt(document.getElementById('banDuration').value.trim(), 10);
 
-    // 사용자 추방 기능
-    function kickUser(username) {
-        alert(`${username}을(를) 추방했습니다.`);
-        // 실제 사용자 추방 로직 구현 필요
-    }
+        if (!bannedNames.has(nameToBan)) {
+            bannedNames.add(nameToBan); // 이름을 추방
+            document.getElementById('banMessage').textContent = `${nameToBan}님이 '${banReason}' 이유로 ${banDuration}초 동안 추방되었습니다.`;
 
-    // 사이트 안내 문자 전송 기능
-    document.getElementById('send-message').addEventListener('click', function() {
-        const message = document.getElementById('message').value;
-        if (message) {
-            alert(`안내 문자를 보냈습니다: ${message}`);
-            document.getElementById('message').value = ''; // 입력 필드 초기화
+            // 지정된 시간 후에 추방 해제
+            setTimeout(() => {
+                bannedNames.delete(nameToBan);
+                alert(`${nameToBan}님이 추방 해제되었습니다.`);
+            }, banDuration * 1000);
         } else {
-            alert('메시지를 입력해주세요.');
+            document.getElementById('banMessage').textContent = `${nameToBan}님은 이미 추방된 상태입니다.`;
         }
     });
   </script>
