@@ -91,6 +91,13 @@
             return;
         }
 
+        // 추방 확인
+        const banStatus = localStorage.getItem(`banned_${name}`);
+        if (banStatus) {
+            alert('당신은 추방되었습니다.');
+            return;
+        }
+
         // 로컬 스토리지에 피드백 저장
         const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
         feedbacks.push({ name, feedback, date: new Date().toLocaleString() });
@@ -127,33 +134,39 @@
     }
 
     // 추방 기능
-    const bannedUsers = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-
     document.getElementById('banForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 기본 제출 방지
         const banName = this.elements.banName.value;
         const banReason = this.elements.banReason.value;
-        const banDuration = parseInt(this.elements.banDuration.value);
+        const banDuration = this.elements.banDuration.value;
 
-        // 사용자를 추방
-        bannedUsers.push({ name: banName, reason: banReason, duration: banDuration, timestamp: Date.now() });
-        localStorage.setItem('bannedUsers', JSON.stringify(bannedUsers));
-
+        // 추방 메시지 표시
         alert(`${banName}는 '${banReason}' 때문에 ${banDuration}초 동안 추방되었습니다.`);
+        
+        // 추방된 사용자 로컬 스토리지에 저장
+        const banEndTime = Date.now() + banDuration * 1000; // 현재 시간 + 추방 시간
+        localStorage.setItem(`banned_${banName}`, banEndTime);
+
+        // 추방 확인
+        setTimeout(() => {
+            localStorage.removeItem(`banned_${banName}`); // 시간 초과 후 추방 해제
+            alert(`${banName}의 추방이 해제되었습니다.`);
+        }, banDuration * 1000);
     });
 
-    // 페이지 로드 시 추방 확인
-    window.onload = function() {
-        const currentTime = Date.now();
-        bannedUsers.forEach(user => {
-            if (currentTime < user.timestamp + user.duration * 1000) {
-                alert(`${user.name}는 현재 추방 중입니다. (${user.reason})`);
-                // 웹사이트 접근 차단
-                document.body.innerHTML = "<h1>당신은 추방되었습니다.</h1>";
-                return; // 이후 코드 실행 방지
+    // 페이지 로드 시 추방 상태 확인
+    window.addEventListener('load', () => {
+        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
+        const banKeys = Object.keys(localStorage).filter(key => key.startsWith('banned_'));
+
+        banKeys.forEach(key => {
+            const banEndTime = localStorage.getItem(key);
+            if (Date.now() < banEndTime) {
+                alert(`당신은 ${key.replace('banned_', '')}으로부터 추방되었습니다.`);
+                localStorage.removeItem(key); // 추방된 사용자 상태 제거
             }
         });
-    };
+    });
   </script>
 </body>
 </html>
