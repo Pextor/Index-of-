@@ -3,17 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Index of /</title>
+  <title>내 웹사이트</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    form {
+      margin: 20px 0;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #admin-section {
+      margin-top: 50px;
+      display: none; /* 초기에는 관리자 섹션 숨김 */
     }
     ul {
       list-style-type: none;
       padding: 0;
-    }
-    li {
-      margin: 5px 0;
     }
   </style>
 </head>
@@ -26,5 +50,71 @@
     <li><a href="folder1/">folder1/</a></li>
     <li><a href="folder2/">folder2/</a></li>
   </ul>
+
+  <h1>의견 남기기</h1>
+  <form id="feedbackForm">
+      <textarea name="feedback" placeholder="의견을 남겨주세요." required></textarea>
+      <button type="submit">보내기</button>
+  </form>
+
+  <h2>관리자 로그인</h2>
+  <form id="adminLoginForm">
+      <input type="password" placeholder="비밀번호 입력" required />
+      <button type="submit">로그인</button>
+  </form>
+
+  <div id="admin-section">
+    <h2>관리자 페이지</h2>
+    <h3>수신된 의견</h3>
+    <ul id="feedback-list"></ul>
+  </div>
+
+  <script>
+    document.getElementById('feedbackForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // 기본 제출 방지
+        const feedback = this.elements.feedback.value;
+
+        // 서버에 의견 전송
+        const response = await fetch('/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ feedback }),
+        });
+
+        if (response.ok) {
+            alert('의견이 전송되었습니다!');
+            this.reset(); // 폼 초기화
+        } else {
+            alert('전송 중 오류가 발생했습니다.');
+        }
+    });
+
+    // 관리자 로그인 이벤트
+    document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 기본 제출 방지
+        const password = this.elements[0].value;
+
+        // 비밀번호 체크 (예: 'admin123'로 설정)
+        if (password === 'admin123') {
+            document.getElementById('admin-section').style.display = 'block';
+            fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
+        } else {
+            alert('잘못된 비밀번호입니다.');
+        }
+    });
+
+    // 피드백 가져오기
+    async function fetchFeedback() {
+        const response = await fetch('/api/feedback');
+        const feedbacks = await response.json();
+        const list = document.getElementById('feedback-list');
+
+        feedbacks.forEach(feedback => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${feedback.date}: ${feedback.feedback}`;
+            list.appendChild(listItem);
+        });
+    }
+  </script>
 </body>
 </html>
