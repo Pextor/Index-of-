@@ -35,6 +35,9 @@
       margin-top: 50px;
       display: none; /* 초기에는 관리자 섹션 숨김 */
     }
+    #message-section {
+      display: none; /* 초기에는 메시지 섹션 숨김 */
+    }
     ul {
       list-style-type: none;
       padding: 0;
@@ -58,13 +61,6 @@
       <button type="submit">보내기</button>
   </form>
 
-  <h1>모든 사용자에게 메시지 전송</h1>
-  <form id="messageForm">
-      <textarea id="message" placeholder="보낼 메시지를 입력하세요." required></textarea>
-      <button type="submit">메시지 전송</button>
-  </form>
-  <div id="message-list"></div>
-
   <h2>관리자 로그인</h2>
   <form id="adminLoginForm">
       <input type="password" placeholder="비밀번호 입력" required />
@@ -73,6 +69,13 @@
 
   <div id="admin-section">
     <h2>관리자 페이지</h2>
+    <h3>모든 사용자에게 메시지 전송</h3>
+    <form id="messageForm">
+        <textarea id="message" placeholder="보낼 메시지를 입력하세요." required></textarea>
+        <button type="submit">메시지 전송</button>
+    </form>
+    <div id="message-list"></div>
+
     <h3>수신된 의견</h3>
     <ul id="feedback-list"></ul>
 
@@ -86,6 +89,17 @@
   </div>
 
   <script>
+    // 로그인 상태 확인
+    function checkLoginStatus() {
+        const isLoggedIn = localStorage.getItem('adminLoggedIn');
+        if (isLoggedIn) {
+            document.getElementById('admin-section').style.display = 'block';
+            document.getElementById('message-section').style.display = 'block'; // 메시지 섹션 표시
+            fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
+            displayMessages(); // 관리자 페이지 로드 시 메시지 가져오기
+        }
+    }
+
     // 피드백 제출 처리
     document.getElementById('feedbackForm').addEventListener('submit', function(event) {
         event.preventDefault(); // 기본 제출 방지
@@ -149,9 +163,8 @@
 
         // 비밀번호 체크 (예: 'admin123'로 설정)
         if (password === 'gameballCVE') {
-            document.getElementById('admin-section').style.display = 'block';
-            fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
-            displayMessages(); // 관리자 페이지 로드 시 메시지 가져오기
+            localStorage.setItem('adminLoggedIn', true); // 로그인 상태 저장
+            checkLoginStatus(); // 로그인 상태 확인
         } else {
             alert('잘못된 비밀번호입니다.');
         }
@@ -162,48 +175,4 @@
         const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
         const list = document.getElementById('feedback-list');
 
-        feedbacks.forEach(feedback => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${feedback.date} - ${feedback.name}: ${feedback.feedback}`;
-            list.appendChild(listItem);
-        });
-    }
-
-    // 추방 기능
-    document.getElementById('banForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // 기본 제출 방지
-        const banName = this.elements.banName.value;
-        const banReason = this.elements.banReason.value;
-        const banDuration = this.elements.banDuration.value;
-
-        // 추방 메시지 표시
-        alert(`${banName}는 '${banReason}' 때문에 ${banDuration}초 동안 추방되었습니다.`);
-        
-        // 추방된 사용자 로컬 스토리지에 저장
-        const banEndTime = Date.now() + banDuration * 1000; // 현재 시간 + 추방 시간
-        localStorage.setItem(`banned_${banName}`, banEndTime);
-
-        // 추방 확인
-        setTimeout(() => {
-            localStorage.removeItem(`banned_${banName}`); // 시간 초과 후 추방 해제
-            alert(`${banName}의 추방이 해제되었습니다.`);
-        }, banDuration * 1000);
-    });
-
-    // 페이지 로드 시 추방 상태 확인
-    window.addEventListener('load', () => {
-        displayMessages(); // 페이지 로드 시 메시지 표시
-        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
-        const banKeys = Object.keys(localStorage).filter(key => key.startsWith('banned_'));
-
-        banKeys.forEach(key => {
-            const banEndTime = localStorage.getItem(key);
-            if (Date.now() < banEndTime) {
-                alert(`당신은 ${key.replace('banned_', '')}으로부터 추방되었습니다.`);
-                localStorage.removeItem(key); // 추방된 사용자 상태 제거
-            }
-        });
-    });
-  </script>
-</body>
-</html>
+        list.in
