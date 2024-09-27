@@ -1,264 +1,35 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Index of /</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      color: #333;
-    }
-    form {
-      margin: 20px 0;
-    }
-    textarea {
-      width: 100%;
-      height: 100px;
-    }
-    button {
-      padding: 10px 15px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    #admin-section {
-      margin-top: 50px;
-      display: none; /* 초기에는 관리자 섹션 숨김 */
-    }
-    ul {
-      list-style-type: none;
-      padding: 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index of /</title>
+    <style>
+        body {
+            background-color: #FFFFFF; /* 흰색 배경 */
+            color: #000000; /* 검은색 텍스트 */
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 72px;
+            margin: 0; /* 여백 제거 */
+        }
+        h2 {
+            font-size: 36px;
+            margin: 10px 0; /* 위아래 여백 */
+        }
+        p {
+            font-size: 24px;
+            margin: 5px 0; /* 위아래 여백 */
+        }
+    </style>
 </head>
 <body>
-  <h1>Index of /</h1>
-  <ul id="file-list">
-    <li><a href="https://ko.anotepad.com/note/read/x3q4timb">설명서</a></li>
-    <li><a href="https://www.goolge.com">구글</a></li>
-    <li><a href="https://www.naver.com">네이버</a></li>
-    <li><a href="https://pextor.github.io/ho/">원하는 사이트 검색</a><li>
-    <li><a href="https://www.livegore.com/203129/face-cut-in-half-still-alive">치섹의 남편</a><li>
-    <li><a href="https://www.bsetgore.fun">베스트 고어 펀</a><li>
-    <li><a href="https://civitai.com/models/7563/alice-nikke">시비타</a><li>
-    <li><a href="https://ilbe.com">일간베스트</a></li>
-    <li><a href="https://www.duckduckgo.com">덕덕고</a></li>
-    <li><a href="https://www.youtube.com">유튜브</a></li>
-    <li><a href="https://www.livegore.com">라이브 고어</a></li>
-  </ul>
-
-  <h1>의견 남기기</h1>
-  <form id="feedbackForm">
-      <input type="text" id="name" placeholder="실명을 입력하시오." required />
-      <textarea name="feedback" placeholder="의견을 남겨주세요." required></textarea>
-      <button type="submit">보내기</button>
-  </form>
-
-  <h2>관리자 로그인</h2>
-  <form id="adminLoginForm">
-      <input type="password" placeholder="비밀번호 입력" required />
-      <button type="submit">로그인</button>
-  </form>
-
-  <div id="admin-section">
-    <h2>관리자 페이지</h2>
-    
-    <h3>모든 사용자에게 메시지 전송</h3>
-    <form id="messageForm">
-        <input type="text" id="recipientName" placeholder="받는 사람" required />
-        <textarea id="message" placeholder="보낼 메시지를 입력하세요." required></textarea>
-        <button type="submit">메시지 전송</button>
-    </form>
-    <div id="message-list"></div>
-
-    <h3>특정 사용자에게 메시지 전송</h3>
-    <form id="specificMessageForm">
-        <input type="text" id="specificRecipient" placeholder="받는 사람" required />
-        <textarea id="specificMessage" placeholder="보낼 메시지를 입력하세요." required></textarea>
-        <button type="submit">메시지 전송</button>
-    </form>
-    <div id="specific-message-list"></div>
-
-    <h3>수신된 의견</h3>
-    <ul id="feedback-list"></ul>
-
-    <h3>추방 기능</h3>
-    <form id="banForm">
-        <input type="text" id="banName" placeholder="추방할 이름" required />
-        <textarea id="banReason" placeholder="추방 사유를 입력하세요." required></textarea>
-        <input type="number" id="banDuration" placeholder="추방 기간 (초 단위)" required />
-        <button type="submit">추방하기</button>
-    </form>
-
-    <button id="logoutButton">로그아웃</button> <!-- 로그아웃 버튼 추가 -->
-  </div>
-
-  <script>
-    // 로그인 상태 확인
-    function checkLoginStatus() {
-        const isLoggedIn = localStorage.getItem('adminLoggedIn');
-        if (isLoggedIn) {
-            document.getElementById('admin-section').style.display = 'block';
-            fetchFeedback(); // 관리자 페이지 로드 시 피드백 가져오기
-            displayMessages(); // 관리자 페이지 로드 시 메시지 가져오기
-            displaySpecificMessages(); // 관리자 페이지 로드 시 특정 메시지 가져오기
-        } else {
-            document.getElementById('admin-section').style.display = 'none'; // 로그인하지 않으면 숨김
-        }
-    }
-
-    // 관리자 로그인 이벤트
-    document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // 기본 제출 방지
-        const password = this.elements[0].value;
-
-        // 비밀번호 체크 (예: 'gameballCVE'로 설정)
-        if (password === 'gameballCVE') {
-            localStorage.setItem('adminLoggedIn', true); // 로그인 상태 저장
-            checkLoginStatus(); // 로그인 상태 확인
-            alert('관리자 로그인 성공!');
-        } else {
-            alert('잘못된 비밀번호입니다.');
-        }
-    });
-
-    // 관리자 로그아웃 처리
-    document.getElementById('logoutButton').addEventListener('click', function() {
-        localStorage.removeItem('adminLoggedIn'); // 로그인 상태 삭제
-        checkLoginStatus(); // 로그인 상태 확인
-        alert('로그아웃되었습니다.');
-    });
-
-    // 피드백 제출 처리
-    document.getElementById('feedbackForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // 기본 제출 방지
-        const name = this.elements.name.value;
-        const feedback = this.elements.feedback.value;
-
-        // 한국어 입력 확인
-        if (!/^[가-힣]+$/.test(name)) {
-            alert('실명은 한국어로 입력해야 합니다.');
-            return;
-        }
-
-        // 추방 확인
-        const banStatus = localStorage.getItem(`banned_${name}`);
-        if (banStatus) {
-            alert('당신은 추방되었습니다.');
-            return;
-        }
-
-        // 로컬 스토리지에 피드백 저장
-        const feedbacks = JSON.parse(localStorage.getItem('feedbacks')) || [];
-        feedbacks.push({ name, feedback, date: new Date().toLocaleString() });
-        localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
-
-        alert('의견이 전송되었습니다!');
-        this.reset(); // 폼 초기화
-        fetchFeedback(); // 피드백 실시간 반영
-    });
-
-    // 모든 사용자에게 메시지 전송
-    document.getElementById('messageForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // 기본 제출 방지
-        const recipient = this.elements.recipientName.value;
-        const message = this.elements.message.value;
-
-        // 메시지를 로컬 스토리지에 저장
-        const messages = JSON.parse(localStorage.getItem('messages')) || [];
-        messages.push({ recipient, message, date: new Date().toLocaleString() });
-        localStorage.setItem('messages', JSON.stringify(messages));
-
-        alert('메시지가 모든 사용자에게 전송되었습니다!');
-        this.reset(); // 폼 초기화
-        displayMessages(); // 메시지 표시
-    });
-
-    // 특정 사용자에게 메시지 전송 기능
-    document.getElementById('specificMessageForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // 기본 제출 방지
-        const recipient = this.elements.specificRecipient.value;
-        const message = this.elements.specificMessage.value;
-
-        // 메시지를 로컬 스토리지에 저장
-        const specificMessages = JSON.parse(localStorage.getItem('specificMessages')) || [];
-        specificMessages.push({ recipient, message, date: new Date().toLocaleString() });
-        localStorage.setItem('specificMessages', JSON.stringify(specificMessages));
-
-        alert(`메시지가 ${recipient}에게 전송되었습니다!`);
-        this.reset(); // 폼 초기화
-        displaySpecificMessages(); // 메시지 표시
-    });
-
-    // 메시지 표시
-    function displayMessages() {
-        const messages = JSON.parse(localStorage.getItem('messages')) || [];
-        const messageList = document.getElementById('message-list');
-        messageList.innerHTML = ''; // 이전 메시지 초기화
-
-        messages.forEach(msg => {
-            const listItem = document.createElement('div');
-            listItem.textContent = `${msg.date} - ${msg.recipient}: ${msg.message}`;
-            messageList.appendChild(listItem);
-        });
-    }
-
-    // 특정 메시지 표시
-    function displaySpecificMessages() {
-        const specificMessages = JSON.parse(localStorage.getItem('specificMessages')) || [];
-        const specificMessageList = document.getElementById('specific-message-list');
-        specificMessageList.innerHTML = ''; // 이전 메시지 초기화
-
-        specificMessages.forEach(msg => {
-            const listItem = document.createElement('div');
-            listItem.textContent = `${msg.date} - ${msg.recipient}: ${msg.message}`;
-            specificMessageList.appendChild(listItem);
-        });
-    }
-
-    // 피드백 가져오기
-    function fetchFeedback() {
-        const feedbacks = JSON.parse(localStorage.getItem
-        ('feedbacks')) || [];
-        const feedbackList = document.getElementById('feedback-list');
-        feedbackList.innerHTML = ''; // 이전 피드백 초기화
-
-        feedbacks.forEach(feedback => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${feedback.date} - ${feedback.name}: ${feedback.feedback}`;
-            feedbackList.appendChild(listItem);
-        });
-    }
-
-    // 사용자 추방 기능
-    document.getElementById('banForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // 기본 제출 방지
-        const name = this.elements.banName.value;
-        const reason = this.elements.banReason.value;
-        const duration = this.elements.banDuration.value;
-
-        // 사용자 추방 처리
-        localStorage.setItem(`banned_${name}`, reason);
-        setTimeout(() => {
-            localStorage.removeItem(`banned_${name}`);
-        }, duration * 1000); // duration을 초 단위로 설정
-
-        alert(`${name}님이 추방되었습니다!`);
-        this.reset(); // 폼 초기화
-    });
-
-    // 페이지 로드 시 로그인 상태 확인
-    window.onload = checkLoginStatus;
-  </script>
+    <h1></h1> <!-- Welcome to Video 부분 삭제 -->
+    <h2>이 사이트는 폐쇄되었습니다.</h2>
+    <p>법적 조치가 취해질 수 있습니다.</p>
+    <p>© 2024 모든 권리 보유.</p>
 </body>
 </html>
