@@ -3,45 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>원하는 사이트 검색</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    <title>Index of /</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+    </style>
 </head>
 <body>
-    <h1>원하는 사이트 검색</h1>
-    <p>𝙒𝙚𝙡𝙘𝙤𝙢𝙚 𝙩𝙤 𝙀𝙧𝙚𝙗𝙪𝙨!</p>
-
-    <input type="text" id="searchInput" onkeyup="searchWord()" placeholder="단어를 입력하세요...">
-
-    <div id="buttons">
-        <button onclick="searchByLetter('A')">A</button>
-        <button onclick="searchByLetter('B')">B</button>
-        <button onclick="searchByLetter('C')">C</button>
-        <button onclick="searchByLetter('D')">D</button>
-        <button onclick="searchByLetter('E')">E</button>
-        <button onclick="searchByLetter('F')">F</button>
-        <button onclick="searchByLetter('G')">G</button>
-        <button onclick="searchByLetter('H')">H</button>
-        <button onclick="searchByLetter('I')">I</button>
-        <button onclick="searchByLetter('J')">J</button>
-        <button onclick="searchByLetter('K')">K</button>
-        <button onclick="searchByLetter('L')">L</button>
-        <button onclick="searchByLetter('M')">M</button>
-        <button onclick="searchByLetter('N')">N</button>
-        <button onclick="searchByLetter('O')">O</button>
-        <button onclick="searchByLetter('P')">P</button>
-        <button onclick="searchByLetter('Q')">Q</button>
-        <button onclick="searchByLetter('R')">R</button>
-        <button onclick="searchByLetter('S')">S</button>
-        <button onclick="searchByLetter('T')">T</button>
-        <button onclick="searchByLetter('U')">U</button>
-        <button onclick="searchByLetter('V')">V</button>
-        <button onclick="searchByLetter('W')">W</button>
-        <button onclick="searchByLetter('X')">X</button>
-        <button onclick="searchByLetter('Y')">Y</button>
-        <button onclick="searchByLetter('Z')">Z</button>
-    </div>
-
-    <div id="search-results"></div>
+    <h1>Index of /</h1>
+    <table>
+        <tr>
+            <th>File Name</th>
+            <th>Size</th>
+            <th>Last Modified</th>
+        </tr>
+        <tr>
+            <td><a href="file1.html">file1.html</a></td>
+            <td>1.2 KB</td>
+            <td>Nov 29, 2024</td>
+        </tr>
+        <tr>
+            <td><a href="file2.html">file2.html</a></td>
+            <td>2.3 KB</td>
+            <td>Nov 30, 2024</td>
+        </tr>
+    </table>
 </body>
 </html>
