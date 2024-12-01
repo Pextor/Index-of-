@@ -26,29 +26,29 @@
             text-decoration: none;
             color: #007BFF;
         }
+        h1 {
+            color: #333;
+        }
     </style>
 </head>
 <body>
     <h1>Index of /</h1>
-    <table>
+    <table id="file-list">
         <tr>
-            <th>Directory / File Name</th>
+            <th>File Name</th>
             <th>Size</th>
             <th>Last Modified</th>
         </tr>
-        <!-- digksrj 폴더 링크 -->
         <tr>
-            <td><a href="digksrj/">digksrj</a></td>
+            <td><a href="javascript:void(0);" onclick="showDirectory('digksrj')">digksrj/</a></td>
             <td>-</td>
             <td>---</td>
         </tr>
-        <!-- file1.html 파일 링크 -->
         <tr>
             <td><a href="file1.html">file1.html</a></td>
             <td>1.2 KB</td>
             <td>Nov 29, 2024</td>
         </tr>
-        <!-- file2.html 파일 링크 -->
         <tr>
             <td><a href="file2.html">file2.html</a></td>
             <td>2.3 KB</td>
@@ -56,25 +56,20 @@
         </tr>
     </table>
 
-    <!-- digksrj 폴더 안에 있는 파일을 보여주는 부분 -->
-    <h2>Index of /digksrj</h2>
-    <table>
-        <tr>
-            <th>Directory / File Name</th>
-            <th>Size</th>
-            <th>Last Modified</th>
-        </tr>
-        <!-- digksrj 폴더 내 파일 -->
-        <tr>
-            <td><a href="digksrj/file1.html">file1.html</a></td>
-            <td>1.2 KB</td>
-            <td>Nov 29, 2024</td>
-        </tr>
-        <tr>
-            <td><a href="digksrj/file2.html">file2.html</a></td>
-            <td>2.3 KB</td>
-            <td>Nov 30, 2024</td>
-        </tr>
-    </table>
+    <!-- 서브 디렉토리 목록을 동적으로 보여줄 부분 -->
+    <div id="subdirectory" style="display:none;">
+        <h1>Index of /digksrj</h1>
+        <table id="subdirectory-list">
+            <tr>
+                <th>File Name</th>
+                <th>Size</th>
+                <th>Last Modified</th>
+            </tr>
+            <!-- JavaScript로 동적으로 파일 목록 추가 -->
+        </table>
+        <button onclick="backToMain()">Back to Main</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
