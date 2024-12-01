@@ -26,23 +26,15 @@
             text-decoration: none;
             color: #007BFF;
         }
-        h1 {
-            color: #333;
-        }
     </style>
 </head>
 <body>
     <h1>Index of /</h1>
-    <table id="file-list">
+    <table>
         <tr>
             <th>File Name</th>
             <th>Size</th>
             <th>Last Modified</th>
-        </tr>
-        <tr>
-            <td><a href="javascript:void(0);" onclick="showDirectory('digksrj')">digksrj/</a></td>
-            <td>-</td>
-            <td>---</td>
         </tr>
         <tr>
             <td><a href="file1.html">file1.html</a></td>
@@ -55,21 +47,5 @@
             <td>Nov 30, 2024</td>
         </tr>
     </table>
-
-    <!-- 서브 디렉토리 목록을 동적으로 보여줄 부분 -->
-    <div id="subdirectory" style="display:none;">
-        <h1>Index of /digksrj</h1>
-        <table id="subdirectory-list">
-            <tr>
-                <th>File Name</th>
-                <th>Size</th>
-                <th>Last Modified</th>
-            </tr>
-            <!-- JavaScript로 동적으로 파일 목록 추가 -->
-        </table>
-        <button onclick="backToMain()">Back to Main</button>
-    </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
